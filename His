@@ -1,0 +1,57 @@
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local hrp = character:WaitForChild("HumanoidRootPart")
+local flying = false
+
+-- Hàm điều khiển bay
+local function toggleFly()
+flying = not flying
+character.Humanoid.PlatformStand = flying
+
+if flying then
+local flightSpeed = 50 -- Tốc độ bay, điều chỉnh nếu cần
+
+while flying do
+wait(0.1)
+local direction = Vector3.new(0, 0, 0)
+
+-- Điều chỉnh di chuyển theo hướng cần bay
+if character:FindFirstChild("HumanoidRootPart") then
+local userInputService = game:GetService("UserInputService")
+
+direction = Vector3.new(
+userInputService:IsKeyDown(Enum.KeyCode.W) and 1 or userInputService:IsKeyDown(Enum.KeyCode.S) and -1 or 0,
+userInputService:IsKeyDown(Enum.KeyCode.Space) and 1 or userInputService:IsKeyDown(Enum.KeyCode.LeftControl) and -1 or 0,
+userInputService:IsKeyDown(Enum.KeyCode.A) and -1 or userInputService:IsKeyDown(Enum.KeyCode.D) and 1 or 0
+)
+
+hrp.Velocity = hrp.CFrame.LookVector * flightSpeed * direction.Z + hrp.CFrame.RightVector * flightSpeed * direction.X + Vector3.new(0, flightSpeed * direction.Y, 0)
+end
+end
+else
+hrp.Velocity = Vector3.new(0, 0, 0)
+end
+end
+
+-- Gán các phím tắt để bật/tắt bay
+game:GetService("UserInputService").InputBegan:Connect(function(input)
+if input.KeyCode == Enum.KeyCode.F then
+toggleFly()
+end
+end)
+
+local function safeFarmWithFly()
+while true do
+wait(1)
+
+-- Logic để farm và thu thập các token
+-- Chỉnh các tọa độ bay đến vị trí an toàn để thu thập
+while not flying do wait(0.1) end -- Chờ cho đến khi bay mới bắt đầu farm
+hrp.CFrame = CFrame.new(math.random(-50, 50), 3, math.random(-50, 50))
+
+wait(math.random(10, 20)) -- Điều chỉnh thời gian dừng để tránh bị phát hiện
+end
+end
+
+safeFarmWithFly()
